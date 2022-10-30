@@ -1,9 +1,11 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -37,38 +39,35 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// Insert Database
-	newRestaurant := Restaurant{Name: "Khang", Addr: "Ben Tre"}
+	log.Println(db)
 
-	if err := db.Create(&newRestaurant).Error; err != nil {
-		log.Println(err)
-	} else {
-		log.Println("New id:", newRestaurant.Id)
-	}
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
 
-	// Select Database
-	var myRestaurant Restaurant
+	// POST	/restaurants
 
-	if err := db.Where("id = ?", 9).First(&myRestaurant).Error; err != nil {
-		log.Println(err)
-	} else {
-		log.Println(myRestaurant)
-	}
+	v1 := r.Group("v1")
 
-	// Update Database
-	newName := ""
-	updateData := RestaurantUpdate{Name: &newName}
+	v1.POST("/restaurants", func(c *gin.Context) {
 
-	if err := db.Where("id = ?", 9).Updates(&updateData).Error; err != nil {
-		log.Println(err)
-	} else {
-		log.Println(myRestaurant)
-	}
+		var data Restaurant
 
-	// Delete Database
-	if err := db.Table(Restaurant{}.TableName()).Where("id = ?", 10).Delete(&myRestaurant).Error; err != nil {
-		log.Println(err)
-	} else {
-		log.Println(myRestaurant)
-	}
+		if err := c.ShouldBind(&data); err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		db.Create(&data)
+
+		c.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+	})
+
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
