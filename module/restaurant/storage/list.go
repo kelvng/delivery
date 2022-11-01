@@ -15,10 +15,14 @@ func (s *sqlStore) ListDataWithCondition(
 
 	var result []restaurantmodel.Restaurant
 
-	db := s.db.Table(restaurantmodel.Restaurant{}.TableName()).Where("status in (1)")
+	db := s.db.Table(restaurantmodel.Restaurant{}.TableName())
 	if f := filter; f != nil {
 		if f.OwnerID > 0 {
 			db = db.Where("owner_id=?", f.OwnerID)
+		}
+
+		if len(f.Status) > 0 {
+			db = db.Where("status in (?)", f.Status)
 		}
 	}
 
