@@ -1,6 +1,8 @@
 package main
 
 import (
+	"awesomeProject1/component/appctx"
+	"awesomeProject1/module/restaurant/transport/ginnrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -40,7 +42,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	log.Println(db)
+	db = db.Debug()
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -49,28 +51,13 @@ func main() {
 		})
 	})
 
-	// POST	/restaurants
+	appContext := appctx.NewAppContext(db)
 
 	v1 := r.Group("v1")
 
 	restaurants := v1.Group("/restaurants")
 
-	restaurants.POST("", func(c *gin.Context) {
-
-		var data Restaurant
-
-		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		db.Create(&data)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
+	restaurants.POST("", ginnrestaurant.CreateRestaurant(appContext))
 
 	//GET ID
 	restaurants.GET("/:id", func(c *gin.Context) {
@@ -94,41 +81,7 @@ func main() {
 	})
 
 	// List Restaurants
-	restaurants.GET("", func(c *gin.Context) {
-
-		var data []Restaurant
-
-		type Paging struct {
-			Page  int `json:"page" form:"page" `
-			Limit int `json:"limit" form:"limit"`
-		}
-
-		var pagingData Paging
-
-		if err := c.ShouldBind(&pagingData); err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		if pagingData.Page <= 0 {
-			pagingData.Page = 1
-		}
-
-		if pagingData.Limit <= 0 {
-			pagingData.Limit = 5
-		}
-
-		db.Offset((pagingData.Page - 1) * pagingData.Limit).
-			Order("id desc").
-			Limit(pagingData.Limit).
-			Find(&data)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
+	restaurants.GET("", ginnrestaurant.ListRestaurant(appContext))
 
 	//Update Restaurants
 	restaurants.PATCH("/:id", func(c *gin.Context) {
@@ -159,23 +112,7 @@ func main() {
 	})
 
 	//Delete Restaurants
-	restaurants.DELETE("/:id", func(c *gin.Context) {
-
-		id, err := strconv.Atoi(c.Param("id"))
-
-		if err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		db.Table(Restaurant{}.TableName()).Where("id = ?", id).Delete(nil)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": 1,
-		})
-	})
+	restaurants.DELETE("/:id", ginnrestaurant.DeleteRestaurant(appContext))
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
