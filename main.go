@@ -2,6 +2,7 @@ package main
 
 import (
 	"awesomeProject1/component/appctx"
+	"awesomeProject1/middleware"
 	"awesomeProject1/module/restaurant/transport/ginnrestaurant"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -45,13 +46,16 @@ func main() {
 	db = db.Debug()
 
 	r := gin.Default()
+
+	appContext := appctx.NewAppContext(db)
+
+	r.Use(middleware.Recover(appContext))
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
-
-	appContext := appctx.NewAppContext(db)
 
 	v1 := r.Group("v1")
 

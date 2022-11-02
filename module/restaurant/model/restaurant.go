@@ -10,6 +10,7 @@ type RestaurantType string
 
 const TypeNormal RestaurantType = "normal"
 const TypePremium RestaurantType = "premium"
+const EntityName = "Restaurant"
 
 type Restaurant struct {
 	common.SQLModel `json:",inline"`
@@ -20,10 +21,18 @@ type Restaurant struct {
 
 func (Restaurant) TableName() string { return "restaurants" }
 
+func (r *Restaurant) Mask(isAdminOrOwner bool) {
+	r.GenUID(common.DbTypeRestaurant)
+}
+
 type RestaurantCreate struct {
 	common.SQLModel `json:",inline"`
 	Name            string `json:"name" gorm:"column:name;"`
 	Addr            string `json:"addr" gorm:"column:addr;"`
+}
+
+func (data *RestaurantCreate) Mask(isAdminOrOwner bool) {
+	data.GenUID(common.DbTypeRestaurant)
 }
 
 func (data *RestaurantCreate) Validate() error {

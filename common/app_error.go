@@ -133,6 +133,14 @@ func ErrEntityNotfound(entity string, err error) *AppError {
 	)
 }
 
+func ErrCannotCreateEntity(entity string, err error) *AppError {
+	return NewCustomError(
+		err,
+		fmt.Sprintf("Cannot Create %s", strings.ToLower(entity)),
+		fmt.Sprintf("ErrCannotCreate%s", entity),
+	)
+}
+
 func ErrNoPermission(entity string, err error) *AppError {
 	return NewCustomError(
 		err,
