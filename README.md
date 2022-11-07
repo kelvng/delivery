@@ -1,6 +1,6 @@
 # delivery
 
-````
+```
 MYSQL_CONN_STRING=root:@tcp(127.0.0.1:3306)/delivery?charset=utf8mb4&parseTime=True&loc=Local;
 S3APIKey=xxxx;
 S3BucketName=delivery-golang;
