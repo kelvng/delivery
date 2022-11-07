@@ -29,10 +29,7 @@ func DeleteRestaurant(appCtx appctx.AppContext) func(c *gin.Context) {
 		biz := restaurantbiz.NewDeleteRestaurantBiz(store)
 
 		if err := biz.DeleteRestaurant(c.Request.Context(), int(uid.GetLocalID())); err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": err.Error(),
-			})
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))

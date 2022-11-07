@@ -2,8 +2,10 @@ package main
 
 import (
 	"awesomeProject1/component/appctx"
+	"awesomeProject1/component/uploadprovider"
 	"awesomeProject1/middleware"
 	"awesomeProject1/module/restaurant/transport/ginnrestaurant"
+	"awesomeProject1/module/upload/transport/ginupload"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -37,6 +39,14 @@ func main() {
 	//dsn := "root:@tcp(127.0.0.1:3306)/delivery?charset=utf8mb4&parseTime=True&loc=Local"
 
 	dsn := os.Getenv("MYSQL_CONN_STRING") // env
+
+	s3BucketName := os.Getenv("S3BucketName")
+	s3Region := os.Getenv("S3Region")
+	s3APIKey := os.Getenv("S3APIKey")
+	s3SecretKey := os.Getenv("S3SecretKey")
+	s3Domain := os.Getenv("S3Domain")
+	//secretKey := os.Getenv("SYSTEM_SECRET")
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -45,10 +55,11 @@ func main() {
 
 	db = db.Debug()
 
+	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
+
+	appContext := appctx.NewAppContext(db, s3Provider)
+
 	r := gin.Default()
-
-	appContext := appctx.NewAppContext(db)
-
 	r.Use(middleware.Recover(appContext))
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -56,11 +67,14 @@ func main() {
 			"message": "pong",
 		})
 	})
+	r.Static("/static", "./static")
 
+	//POST /restaurants
 	v1 := r.Group("v1")
 
-	restaurants := v1.Group("/restaurants")
+	v1.POST("/upload", ginupload.UploadImage(appContext))
 
+	restaurants := v1.Group("/restaurants")
 	restaurants.POST("", ginnrestaurant.CreateRestaurant(appContext))
 
 	//GET ID
