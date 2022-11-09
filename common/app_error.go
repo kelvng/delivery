@@ -141,10 +141,12 @@ func ErrCannotCreateEntity(entity string, err error) *AppError {
 	)
 }
 
-func ErrNoPermission(entity string, err error) *AppError {
+func ErrNoPermission(err error) *AppError {
 	return NewCustomError(
 		err,
 		fmt.Sprintf("You have no permission"),
 		fmt.Sprintf("ErrNoPermission"),
 	)
 }
+
+var RecordNotFound = errors.New("record not found")

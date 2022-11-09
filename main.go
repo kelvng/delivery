@@ -6,6 +6,7 @@ import (
 	"awesomeProject1/middleware"
 	"awesomeProject1/module/restaurant/transport/ginnrestaurant"
 	"awesomeProject1/module/upload/transport/ginupload"
+	"awesomeProject1/module/user/transport/ginuser"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -45,7 +46,7 @@ func main() {
 	s3APIKey := os.Getenv("S3APIKey")
 	s3SecretKey := os.Getenv("S3SecretKey")
 	s3Domain := os.Getenv("S3Domain")
-	//secretKey := os.Getenv("SYSTEM_SECRET")
+	secretKey := os.Getenv("SYSTEM_SECRET")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
@@ -57,7 +58,7 @@ func main() {
 
 	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
 
-	appContext := appctx.NewAppContext(db, s3Provider)
+	appContext := appctx.NewAppContext(db, s3Provider, secretKey)
 
 	r := gin.Default()
 	r.Use(middleware.Recover(appContext))
@@ -73,6 +74,12 @@ func main() {
 	v1 := r.Group("v1")
 
 	v1.POST("/upload", ginupload.UploadImage(appContext))
+
+	v1.POST("/register", ginuser.Register(appContext))
+
+	v1.POST("/authenticate", ginuser.Login(appContext))
+
+	v1.GET("/profile", middleware.RequiredAuth(appContext), ginuser.Profile(appContext))
 
 	restaurants := v1.Group("/restaurants")
 	restaurants.POST("", ginnrestaurant.CreateRestaurant(appContext))
