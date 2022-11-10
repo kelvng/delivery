@@ -4,16 +4,12 @@ import (
 	"awesomeProject1/component/appctx"
 	"awesomeProject1/component/uploadprovider"
 	"awesomeProject1/middleware"
-	"awesomeProject1/module/restaurant/transport/ginnrestaurant"
-	"awesomeProject1/module/upload/transport/ginupload"
-	"awesomeProject1/module/user/transport/ginuser"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 type Restaurant struct {
@@ -73,71 +69,8 @@ func main() {
 	//POST /restaurants
 	v1 := r.Group("v1")
 
-	v1.POST("/upload", ginupload.UploadImage(appContext))
-
-	v1.POST("/register", ginuser.Register(appContext))
-
-	v1.POST("/authenticate", ginuser.Login(appContext))
-
-	v1.GET("/profile", middleware.RequiredAuth(appContext), ginuser.Profile(appContext))
-
-	restaurants := v1.Group("/restaurants")
-	restaurants.POST("", ginnrestaurant.CreateRestaurant(appContext))
-
-	//GET ID
-	restaurants.GET("/:id", func(c *gin.Context) {
-
-		id, err := strconv.Atoi(c.Param("id"))
-
-		if err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		var data Restaurant
-
-		db.Where("id = ?", id).First(&data)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
-
-	// List Restaurants
-	restaurants.GET("", ginnrestaurant.ListRestaurant(appContext))
-
-	//Update Restaurants
-	restaurants.PATCH("/:id", func(c *gin.Context) {
-
-		id, err := strconv.Atoi(c.Param("id"))
-
-		if err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		var data RestaurantUpdate
-
-		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		db.Where("id = ?", id).Updates(&data)
-
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
-	})
-
-	//Delete Restaurants
-	restaurants.DELETE("/:id", ginnrestaurant.DeleteRestaurant(appContext))
+	setupRoute(appContext, v1)
+	setupAdminRoute(appContext, v1)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

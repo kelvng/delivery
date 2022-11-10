@@ -9,7 +9,7 @@ import (
 
 func Profile(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		u := c.MustGet(common.CurrentUser)
+		u := c.MustGet(common.CurrentUser).(common.Requester)
 		//newPass := "kdsjkdfsjkdjfksdf"
 		//type update struct {
 		//	NewPass *string
