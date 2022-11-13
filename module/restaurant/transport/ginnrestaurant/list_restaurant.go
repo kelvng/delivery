@@ -6,6 +6,7 @@ import (
 	restaurantbiz "awesomeProject1/module/restaurant/biz"
 	restaurantmodel "awesomeProject1/module/restaurant/model"
 	restaurantstorage "awesomeProject1/module/restaurant/storage"
+	restaurantlikestorage "awesomeProject1/module/restaurantlike/store"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -32,7 +33,8 @@ func ListRestaurant(appCtx appctx.AppContext) func(c *gin.Context) {
 		filter.Status = []int{1}
 
 		store := restaurantstorage.NewSQLStore(db)
-		biz := restaurantbiz.NewListRestaurantBiz(store)
+		likeStore := restaurantlikestorage.NewSqlStore(db)
+		biz := restaurantbiz.NewListRestaurantBiz(store, likeStore)
 
 		result, err := biz.ListRestaurant(c.Request.Context(), &filter, &pagingData)
 
