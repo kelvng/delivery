@@ -15,8 +15,6 @@ func CreateRestaurant(appCtx appctx.AppContext) func(c *gin.Context) {
 
 		db := appCtx.GetMaiDBConnection()
 
-		requester := c.MustGet(common.CurrentUser).(common.Requester)
-
 		//go func() {
 		//	defer common.AppRecover()
 		//
@@ -29,8 +27,6 @@ func CreateRestaurant(appCtx appctx.AppContext) func(c *gin.Context) {
 		if err := c.ShouldBind(&data); err != nil {
 			panic(err)
 		}
-
-		data.UserId = requester.GetUserId()
 
 		store := restaurantstorage.NewSQLStore(db)
 		biz := restaurantbiz.NewCreateRestaurantBiz(store)

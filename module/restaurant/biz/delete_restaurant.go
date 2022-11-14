@@ -1,9 +1,9 @@
 package restaurantbiz
 
 import (
-	"awesomeProject1/common"
 	restaurantmodel "awesomeProject1/module/restaurant/model"
 	"context"
+	"errors"
 )
 
 type DeleteRestaurantStore interface {
@@ -16,14 +16,12 @@ type DeleteRestaurantStore interface {
 }
 
 type deleteRestaurantBiz struct {
-	store     DeleteRestaurantStore
-	requester common.Requester
+	store DeleteRestaurantStore
 }
 
-func NewDeleteRestaurantBiz(store DeleteRestaurantStore, requester common.Requester) *deleteRestaurantBiz {
+func NewDeleteRestaurantBiz(store DeleteRestaurantStore) *deleteRestaurantBiz {
 	return &deleteRestaurantBiz{
-		store:     store,
-		requester: requester,
+		store: store,
 	}
 }
 
@@ -35,15 +33,11 @@ func (biz *deleteRestaurantBiz) DeleteRestaurant(context context.Context, id int
 	}
 
 	if oldDData.Status == 0 {
-		return common.ErrEntityDeleted(restaurantmodel.EntityName, nil)
-	}
-
-	if oldDData.UserId != biz.requester.GetUserId() {
-		return common.ErrNoPermission(nil)
+		return errors.New("data has been deleted")
 	}
 
 	if err := biz.store.Delete(context, id); err != nil {
-		return common.ErrCannotCreateEntity(restaurantmodel.EntityName, nil)
+		return err
 	}
 
 	return nil

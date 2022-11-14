@@ -20,10 +20,9 @@ func (s *sqlStore) ListDataWithCondition(
 	var result []restaurantmodel.Restaurant
 
 	db := s.db.Table(restaurantmodel.Restaurant{}.TableName())
-
 	if f := filter; f != nil {
 		if f.OwnerID > 0 {
-			db = db.Where("user_id=?", f.OwnerID)
+			db = db.Where("owner_id=?", f.OwnerID)
 		}
 
 		if len(f.Status) > 0 {
@@ -33,10 +32,6 @@ func (s *sqlStore) ListDataWithCondition(
 
 	if err := db.Count(&paging.Total).Error; err != nil {
 		return nil, common.ErrDB(err)
-	}
-
-	for i := range moreKey {
-		db = db.Preload(moreKey[i])
 	}
 
 	if v := paging.FakeCursor; v != "" {
