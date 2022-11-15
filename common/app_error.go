@@ -77,7 +77,7 @@ func ErrInternal(err error) *AppError {
 		"something went wrong in the server", err.Error(), "ErrInternal")
 }
 
-func ErrCannotLisEntity(entity string, err error) *AppError {
+func ErrCannotListEntity(entity string, err error) *AppError {
 	return NewCustomError(
 		err,
 		fmt.Sprintf("Cannot lis %s", strings.ToLower(entity)),
