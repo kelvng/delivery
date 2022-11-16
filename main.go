@@ -81,7 +81,7 @@ func main() {
 
 	v1.GET("/profile", middleware.RequiredAuth(appContext), ginuser.Profile(appContext))
 
-	restaurants := v1.Group("/restaurants")
+	restaurants := v1.Group("/restaurants", middleware.RequiredAuth(appContext))
 	restaurants.POST("", ginnrestaurant.CreateRestaurant(appContext))
 
 	//GET ID
