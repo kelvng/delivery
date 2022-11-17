@@ -4,6 +4,7 @@ import (
 	"awesomeProject1/component/appctx"
 	"awesomeProject1/middleware"
 	"awesomeProject1/module/restaurant/transport/ginnrestaurant"
+	"awesomeProject1/module/restaurantlike/transport/rstlikebiz"
 	"awesomeProject1/module/upload/transport/ginupload"
 	"awesomeProject1/module/user/transport/ginuser"
 	"github.com/gin-gonic/gin"
@@ -78,4 +79,11 @@ func setupRoute(appContext appctx.AppContext, v1 *gin.RouterGroup) {
 
 	//Delete Restaurants
 	restaurants.DELETE("/:id", ginnrestaurant.DeleteRestaurant(appContext))
+
+	restaurants.POST("/:id/like-users", ginrstlike.UserLikeRestaurant(appContext))
+
+	restaurants.DELETE("/:id/like-users", ginrstlike.UserUnlikeRestaurant(appContext))
+
+	restaurants.GET("/:id/like-users", ginrstlike.ListUsers(appContext))
+	//GET /v1/restaurant/:id/like-users
 }
