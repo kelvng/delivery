@@ -12,5 +12,6 @@ func (s *sqlStore) Create(ctx context.Context, data *restaurantlikemodel.Like) e
 	if err := db.Create(data).Error; err != nil {
 		return common.ErrDB(err)
 	}
+	
 	return nil
 }

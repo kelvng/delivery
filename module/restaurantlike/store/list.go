@@ -4,6 +4,7 @@ import (
 	"awesomeProject1/common"
 	restaurantlikemodel "awesomeProject1/module/restaurantlike/model"
 	"context"
+	"fmt"
 	"github.com/btcsuite/btcutil/base58"
 	"time"
 )
@@ -66,7 +67,7 @@ func (s *sqlStore) GetUsersLikeRestaurant(ctx context.Context,
 			return nil, common.ErrDB(err)
 		}
 
-		db = db.Where("created_ad < ?", timeCreate.Format("2006-01-02 15:04:05"))
+		db = db.Where("created_at < ?", timeCreate.Format("2006-01-02 15:04:05"))
 
 	} else {
 		db = db.Offset((paging.Page - 1) * paging.Limit)
@@ -81,15 +82,15 @@ func (s *sqlStore) GetUsersLikeRestaurant(ctx context.Context,
 
 	users := make([]common.SimpleUser, len(result))
 
-	for i, _ := range result {
-		//result[i].User.CreatedAt = item.CreatedAt
-		//result[i].User.UpdatedAt = nil
+	for i, item := range result {
+		result[i].User.CreatedAt = item.CreatedAt
+		result[i].User.UpdatedAt = nil
 		users[i] = *result[i].User
 
-		//if i == len(result)-1 {
-		//	cursorStr := base58.Encode([]byte(fmt.Sprintf("#{item.CreatedAt.Format(timeLayout)}")))
-		//	paging.NextCursor = cursorStr
-		//}
+		if i == len(result)-1 {
+			cursorStr := base58.Encode([]byte(fmt.Sprintf("%v", item.CreatedAt.Format(timeLayout))))
+			paging.NextCursor = cursorStr
+		}
 	}
 
 	return users, nil

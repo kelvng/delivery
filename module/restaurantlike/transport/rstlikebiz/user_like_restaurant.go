@@ -3,6 +3,7 @@ package ginrstlike
 import (
 	"awesomeProject1/common"
 	"awesomeProject1/component/appctx"
+	restaurantstorage "awesomeProject1/module/restaurant/storage"
 	rstlikebbiz "awesomeProject1/module/restaurantlike/biz"
 	restaurantlikemodel "awesomeProject1/module/restaurantlike/model"
 	restaurantlikestorage "awesomeProject1/module/restaurantlike/store"
@@ -26,7 +27,8 @@ func UserLikeRestaurant(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		store := restaurantlikestorage.NewSqlStore(appCtx.GetMaiDBConnection())
-		biz := rstlikebbiz.NewUserLikeRestaurantBiz(store)
+		incStore := restaurantstorage.NewSQLStore(appCtx.GetMaiDBConnection())
+		biz := rstlikebbiz.NewUserLikeRestaurantBiz(store, incStore)
 
 		if err := biz.LikeRestaurant(c.Request.Context(), &data); err != nil {
 			panic(err)
