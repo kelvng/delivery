@@ -174,6 +174,7 @@ CREATE TABLE `restaurants` (
                                `cover` json DEFAULT NULL,
                                `logo` json DEFAULT NULL,
                                `shipping_fee_per_km` double DEFAULT '0',
+                               `liked_count` int(6) DEFAULT 0,
                                `status` int NOT NULL DEFAULT '1',
                                `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
                                `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

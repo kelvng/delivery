@@ -1,7 +1,7 @@
 package rstlikebbiz
 
 import (
-	"awesomeProject1/common"
+	"awesomeProject1/component/asyncjob"
 	restaurantlikemodel "awesomeProject1/module/restaurantlike/model"
 	"context"
 	"log"
@@ -40,12 +40,14 @@ func (biz *userLikeRestaurantBiz) LikeRestaurant(
 		return restaurantlikemodel.ErrCannotLikeRestaurant(err)
 	}
 
-	go func() {
-		defer common.AppRecover()
-		if err := biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId); err != nil {
-			log.Println(err)
-		}
-	}()
+	// Side effect
+	j := asyncjob.NewJob(func(ctx context.Context) error {
+		return biz.incStore.IncreaseLikeCount(ctx, data.RestaurantId)
+	})
+
+	if err := asyncjob.NewGroup(true, j).Run(ctx); err != nil {
+		log.Println(err)
+	}
 
 	return nil
 }
