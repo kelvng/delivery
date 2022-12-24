@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
@@ -35,7 +34,7 @@ func main() {
 	// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	//dsn := "root:@tcp(127.0.0.1:3306)/delivery?charset=utf8mb4&parseTime=True&loc=Local"
 
-	dsn := os.Getenv("MYSQL_CONN_STRING") // env
+	dsn := "bc8c4cf9cd5307:de804454@tcp(us-cdbr-east-06.cleardb.net)/heroku_1e50603699e4adf?charset=utf8mb4&parseTime=True&loc=Local" // env
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
