@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Restaurant struct {
@@ -42,6 +43,11 @@ func main() {
 	s3SecretKey := "+6P/QGf13VDIXMFJRI+8POI0M2vuyVBUHvt+sH5M"
 	s3Domain := "https://d2ygp6qy0o4yxw.cloudfront.net"
 	secretKey := "MaiKhaAi"
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8080"
+	}
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
@@ -71,5 +77,5 @@ func main() {
 	setupRoute(appContext, v1)
 	setupAdminRoute(appContext, v1)
 
-	r.Run(":8080") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run(":" + port) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
