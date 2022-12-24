@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"net/http"
-	"os"
 )
 
 type Restaurant struct {
@@ -35,21 +34,14 @@ func main() {
 	// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	//dsn := "root:@tcp(127.0.0.1:3306)/delivery?charset=utf8mb4&parseTime=True&loc=Local"
 
-	dsn := os.Getenv("bc8c4cf9cd5307:de804454@us-cdbr-east-06.cleardb.net/heroku_1e50603699e4adf?reconnect=true") // env
+	dsn := "bc8c4cf9cd5307:de804454@tcp(us-cdbr-east-06.cleardb.net)/heroku_1e50603699e4adf?charset=utf8mb4&parseTime=True&loc=Local" // env
 
-	//s3BucketName := os.Getenv("S3BucketName")
-	//s3Region := os.Getenv("S3Region")
-	//s3APIKey := os.Getenv("S3APIKey")
-	//s3SecretKey := os.Getenv("S3SecretKey")
-	//s3Domain := os.Getenv("S3Domain")
-	//secretKey := os.Getenv("SYSTEM_SECRET")
-
-	s3BucketName := os.Getenv("delivery-golang")
-	s3Region := os.Getenv("ap-southeast-1")
-	s3APIKey := os.Getenv("AKIA2LX3UTKASMGBRKNV")
-	s3SecretKey := os.Getenv("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")
-	s3Domain := os.Getenv("https://d2ygp6qy0o4yxw.cloudfront.net")
-	secretKey := os.Getenv("MaiKhaAi")
+	s3BucketName := "delivery-golang"
+	s3Region := "ap-southeast-1"
+	s3APIKey := "AKIA2LX3UTKASMGBRKNV"
+	s3SecretKey := "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"
+	s3Domain := "https://d2ygp6qy0o4yxw.cloudfront.net"
+	secretKey := "MaiKhaAi"
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
