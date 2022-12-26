@@ -4,6 +4,7 @@ import (
 	"awesomeProject1/component/appctx"
 	"awesomeProject1/component/uploadprovider"
 	"awesomeProject1/middleware"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -37,7 +38,7 @@ func main() {
 
 	dsn := "bc8c4cf9cd5307:de804454@tcp(us-cdbr-east-06.cleardb.net)/heroku_1e50603699e4adf?charset=utf8mb4&parseTime=True&loc=Local" // env
 
-	s3BucketName := "delivery-golang"
+	s3BucketName := "heroku_1e50603699e4adf"
 	s3Region := "ap-southeast-1"
 	s3APIKey := "AKIA2LX3UTKASMGBRKNV"
 	s3SecretKey := "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"
@@ -62,7 +63,15 @@ func main() {
 	appContext := appctx.NewAppContext(db, s3Provider, secretKey)
 
 	r := gin.Default()
+
 	r.Use(middleware.Recover(appContext))
+
+	// Enable CORS for all routes
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE"}
+	config.AllowHeaders = []string{"Origin", "Content-Type"}
+	r.Use(cors.New(config))
 
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -72,7 +81,10 @@ func main() {
 	r.Static("/static", "./static")
 
 	//POST /restaurants
-	v1 := r.Group("v1")
+	v1 := r.Group("v1", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
+		// ...
+	})
 
 	setupRoute(appContext, v1)
 	setupAdminRoute(appContext, v1)
