@@ -4,6 +4,9 @@ import (
 	"awesomeProject1/component/appctx"
 	"awesomeProject1/component/uploadprovider"
 	"awesomeProject1/middleware"
+	"awesomeProject1/pubsub/localpd"
+	"awesomeProject1/skio"
+	"awesomeProject1/subscriber"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -34,16 +37,15 @@ func (RestaurantUpdate) TableName() string {
 
 func main() {
 	// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
-	//dsn := "root:@tcp(127.0.0.1:3306)/delivery?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := os.Getenv("MYSQL_CONN_STRING") // env
 
-	dsn := "bc8c4cf9cd5307:de804454@tcp(us-cdbr-east-06.cleardb.net)/heroku_1e50603699e4adf?charset=utf8mb4&parseTime=True&loc=Local" // env
+	s3BucketName := os.Getenv("S3BucketName")
+	s3Region := os.Getenv("S3Region")
+	s3APIKey := os.Getenv("S3APIKey")
+	s3SecretKey := os.Getenv("S3SecretKey")
+	s3Domain := os.Getenv("S3Domain")
+	secretKey := os.Getenv("SYSTEM_SECRET")
 
-	s3BucketName := "heroku_1e50603699e4adf"
-	s3Region := "ap-southeast-1"
-	s3APIKey := "AKIA2LX3UTKASMGBRKNV"
-	s3SecretKey := "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"
-	s3Domain := "https://d2ygp6qy0o4yxw.cloudfront.net"
-	secretKey := "MaiKhaAi"
 	port := os.Getenv("PORT")
 
 	if port == "" {
@@ -59,8 +61,14 @@ func main() {
 	db = db.Debug()
 
 	s3Provider := uploadprovider.NewS3Provider(s3BucketName, s3Region, s3APIKey, s3SecretKey, s3Domain)
+	ps := localpd.NewPubSub()
+	appContext := appctx.NewAppContext(db, s3Provider, secretKey, ps)
 
-	appContext := appctx.NewAppContext(db, s3Provider, secretKey)
+	//set up subscriber
+
+	//subscriber.Setup(appContext, context.Background())
+
+	_ = subscriber.NewEngine(appContext).Start()
 
 	r := gin.Default()
 
@@ -88,6 +96,9 @@ func main() {
 
 	setupRoute(appContext, v1)
 	setupAdminRoute(appContext, v1)
+
+	rtEngine := skio.NewEngine()
+	appContext.SetRealtimeEngine(rtEngine)
 
 	r.Run(":" + port) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
